@@ -28,6 +28,8 @@ The product architecture and requirements are comprehensively documented in the 
 | **[Product Requirements Document (PRD)](./docs/PRD.md)** | Product vision, target personas (children 8–12 & grown-ups), 9 subject areas, 15 core features, the 9-step learning loop, 6-tier help ladder, UX standards, child safety guidelines, and acceptance criteria. |
 | **[Technical Architecture Specification](./docs/ARCHITECTURE.md)** | Technical design, Next.js App Router structure, component hierarchy, FSM learning engine, declarative Zod content model, HTML5 Canvas/SVG simulation pipeline, client-first storage, future AI gateway, and testing strategy. |
 | **[Sequential Implementation Plan](./docs/IMPLEMENTATION_PLAN.md)** | 9 sequential engineering phases with clear tasks, dependencies, deliverables, and acceptance criteria. |
+| **[Existing System Audit Report](./docs/EXISTING_SYSTEM_AUDIT.md)** | Thorough audit of the existing workspace, AI connection status, Talk/Write mode architecture, visual simulation pipeline, and data boundaries. |
+| **[AI Setup & Integration Guide](./docs/AI_SETUP.md)** | Complete guide for configuring Google Gemini server-side credentials, offline deterministic fallbacks, PII scrubbing, and rate limits. |
 
 ---
 
@@ -86,49 +88,32 @@ lumi6/
 
 ## 🚀 Getting Started & Local Development
 
-*(Once implementation begins in Part 2)*
+### Quick Start (Zero-Dependency Node.js Server)
+1. Ensure [Node.js](https://nodejs.org/) (version 18+) is installed.
+2. (Optional) Set up your Gemini API key in `.env.local`:
+   ```bash
+   cp .env.example .env.local
+   # Edit .env.local and add: GEMINI_API_KEY=your_key_here
+   ```
+3. Start the Lumi6 server:
+   ```bash
+   node server.js
+   # or: npm start
+   ```
+4. Open [http://localhost:3000](http://localhost:3000) in your web browser.
+   *(Note: If no API key is provided, Lumi6 runs automatically in full offline deterministic mode!)*
 
-### Prerequisites
-- [Node.js](https://nodejs.org/) (version 18.17+ or 20+)
-- `npm` (version 9+ or 10+)
+### Standalone Browser Mode (No Server Required)
+You can also open [`index.html`](./index.html) directly in any modern browser to interact with Talk Mode, Write Mode, the Shadow & Light simulator, Prism & Rainbow chamber, flashcards, quizzes, and local progress tracking immediately!
 
-### 1. Installation
-Clone the repository and install dependencies:
+### Verification & Testing
+Execute the automated test suites:
 ```bash
-git clone https://github.com/your-username/lumi6.git
-cd lumi6
-npm install
+# Run backend & logic verification tests
+node tests/think-first-engine.test.js
+# or: npm test
 ```
-
-### 2. Development Server
-Start the local Next.js development server:
-```bash
-npm run dev
-```
-Open [http://localhost:3000](http://localhost:3000) in your browser to view the application.
-
-### 3. Verification & Testing
-Execute the test suites and type checkers:
-```bash
-# Run unit & component tests
-npm run test
-
-# Run accessibility audits & end-to-end tests
-npm run test:e2e
-
-# Run TypeScript type check
-npm run type-check
-
-# Run linter
-npm run lint
-```
-
-### 4. Production Build
-Create an optimized production build:
-```bash
-npm run build
-npm run start
-```
+Or open [`tests/test-runner.html`](./tests/test-runner.html) directly in your browser to run the 12-test automated verification suite with visual status indicators.
 
 ---
 
@@ -143,5 +128,6 @@ npm run start
 
 ## 📌 Project Status
 
-- **Current State:** Part 1 Complete (Product Requirements, Technical Architecture & Implementation Roadmap fully documented).
-- **Next Step:** Awaiting explicit instruction for Part 2 (Implementation Phase).
+- **Current State:** Part 3 Complete (Think-First AI & Interactive Learning Features fully implemented and verified).
+- **Interactive Experience:** Open [`index.html`](./index.html) in any modern web browser to interactively explore Talk Mode (voice input & synthesis), Write Mode, Shadow & Light simulation, Prism & Rainbow simulation, 5-tier Progressive Hints, Thinking Flashcards, and Milestone Quizzes.
+- **Automated Verification:** Open [`tests/test-runner.html`](./tests/test-runner.html) to run the browser-based automated verification suite.

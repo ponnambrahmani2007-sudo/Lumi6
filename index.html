@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lumi6 — Think. Explore. Discover.</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              lavender: '#7C65C1',
+              'lavender-subtle': '#F4F2FB',
+              'lavender-dark': '#5B44A3',
+              mint: '#2DD4BF',
+              'mint-dark': '#0D9488',
+              'mint-subtle': '#E6FFFA',
+              yellow: '#FDE047',
+              'yellow-dark': '#D97706',
+              'yellow-subtle': '#FEF9C3',
+            },
+            surface: {
+              neutral: '#FAFAFC',
+              card: '#FFFFFF',
+              subtle: '#F1F5F9',
+            },
+            ink: {
+              primary: '#1E1B4B',
+              muted: '#475569',
+              light: '#64748B',
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- React 18 & Babel for JSX -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #FAFAFC;
+      color: #1E1B4B;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Smooth card flip for flashcards */
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+    .transform-style-3d {
+      transform-style: preserve-3d;
+    }
+    .backface-hidden {
+      backface-visibility: hidden;
+    }
+    .rotate-y-180 {
+      transform: rotateY(180deg);
+    }
+
+    /* Acoustic wave animation for Talk Mode */
+    @keyframes pulseWave {
+      0%, 100% { height: 12px; }
+      50% { height: 44px; }
+    }
+    .wave-bar {
+      animation: pulseWave 1.2s ease-in-out infinite;
+    }
+    .wave-bar:nth-child(2) { animation-delay: 0.2s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.4s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.6s; }
+    .wave-bar:nth-child(5) { animation-delay: 0.8s; }
+
+    /* Custom smooth scroll */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F1F5F9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-surface-neutral selection:bg-brand-lavender/20">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // --- CURRICULUM CONCEPTS WITH THINK-FIRST PEDAGOGY ---
+    const CONCEPT_DATA = {
+      shadows: {
+        id: 'shadows',
+        title: 'Shadows & Light Travel',
+        subject: 'Science & Physics',
+        initialPrompt: "Why does a shadow change size when an object moves?",
+        predictionQuestion: "What do you think will happen to the shadow if we move the light source closer to the object?",
+        predictionOptions: [
+          "The shadow will get bigger on the wall",
+          "The shadow will shrink and get smaller",
+          "The shadow will stay the exact same size"
+        ],
+        scientificFact: "Light travels in straight rays. When an opaque object blocks light, it casts a shadow. Bringing the light closer to the object makes the object block a wider cone of light rays, which spreads a much larger shadow onto the wall behind it.",
+        realWorldAnalogy: "When you walk past a streetlight at night: far away, your shadow stretches long ahead of you. Right under the bulb, your shadow shrinks right beneath your sneakers!",
+        practicalHomeActivity: {
+          title: "Hands-on: The Flashlight Wall Mystery",
+          materials: ["A phone flashlight or small lamp", "A toy or your hand", "A plain wall"],
+          steps: [
+            "Dim the room lights.",
+            "Hold your hand steady 1 foot in front of a wall.",
+            "Move the flashlight closer to your hand, then pull it back.",
+            "Watch your hand shadow grow into a gentle giant!"
+          ],
+          safetyTip: "Never look directly into a bright flashlight."
+        },
+        hints: [
+          { level: 1, title: "Gentle Prompt", text: "Look closely at the straight beams coming from the flashlight. Where do they hit the toy?" },
+          { level: 2, title: "Observation Clue", text: "Notice the angle between the top beam and bottom beam when the light is close versus far." },
+          { level: 3, title: "Concept Clue", text: "Light travels in straight lines! The closer the light gets, the wider the cone of light that gets blocked." },
+          { level: 4, title: "Similar Example", text: "Think of a movie projector in a cinema: a tiny piece of film close to a bright lamp fills a giant theater screen!" },
+          { level: 5, title: "Full Explanation", text: "Light spreads outward in straight lines from a point source. When the light moves closer to an obstacle, that obstacle interrupts a larger portion of the beam's angle. This casts a wider, larger shadow silhouette on the screen behind!" }
+        ],
+        flashcards: [
+          {
+            id: 'sh-1',
+            question: "Why do shadows form in the first place?",
+            answer: "Because light travels in straight lines and cannot bend around solid, opaque objects, leaving a dark silhouette behind."
+          },
+          {
+            id: 'sh-2',
+            question: "What happens to a shadow when the light gets CLOSER to the object?",
+            answer: "The shadow becomes BIGGER because the object blocks a wider angle of spreading light rays."
+          },
+          {
+            id: 'sh-3',
+            question: "Does the object itself change size when its shadow changes size?",
+            answer: "No! The object stays exactly the same size. Only the distance between light, object, and wall changes the shadow."
+          }
+        ],
+        quiz: [
+          {
+            id: 'q-sh-1',
+            question: "What is most likely to happen if the light source moves closer to an object while the screen and object stay in the same arrangement?",
+            options: [
+              { id: 'a', text: "The shadow gets noticeably larger on the screen.", correct: true, explanation: "Spot on! The object blocks a wider cone of rays, casting a larger shadow." },
+              { id: 'b', text: "The shadow disappears completely.", correct: false, explanation: "The shadow is still there as long as light is blocked!" },
+              { id: 'c', text: "The shadow shrinks to a tiny dot.", correct: false, explanation: "Moving light farther makes it smaller; moving closer makes it expand." }
+            ],
+            hint: "Picture holding your hand 2 inches from a flashlight."
+          },
+          {
+            id: 'q-sh-2',
+            question: "Why are shadows sharp and straight rather than curvy like water waves?",
+            options: [
+              { id: 'a', text: "In everyday situations, light travels in straight rays.", correct: true, explanation: "Exactly right! Light travels in straight lines, creating crisp edges." },
+              { id: 'b', text: "Shadows are painted by the wall.", correct: false, explanation: "Shadows are just the absence of light!" }
+            ],
+            hint: "Remember that light doesn't bend around corners on its own."
+          }
+        ]
+      },
+
+      prisms: {
+        id: 'prisms',
+        title: 'Prisms & Rainbow Colors',
+        subject: 'Science & Physics',
+        initialPrompt: "How does a clear glass prism create a rainbow from white sunlight?",
+        predictionQuestion: "What do you think white sunlight is really made of before it touches the glass?",
+        predictionOptions: [
+          "White light is already a mixture of all the colors together",
+          "The glass paints the light using special dyes inside",
+          "White light only contains red and blue"
+        ],
+        scientificFact: "White sunlight is actually a mixture of all colors of the rainbow combined together! Inside glass, light slows down and bends (refracts). Because each color has a different wavelength, each color bends at a slightly different angle: red bends the least, and violet bends the most!",
+        realWorldAnalogy: "After a rainy day, millions of tiny round raindrops in the air act like miniature prisms, bending sunlight into a giant rainbow in the sky!",
+        practicalHomeActivity: {
+          title: "Hands-on: Make a Window Rainbow",
+          materials: ["A clear glass of water", "A sunny window or flashlight", "A white piece of paper"],
+          steps: [
+            "Set the paper on the floor or table in sunlight.",
+            "Hold the glass of water slightly above the paper.",
+            "Tilt the glass gently until vibrant rainbow stripes dance on the sheet!"
+          ],
+          safetyTip: "Always handle glassware with adult supervision."
+        },
+        hints: [
+          { level: 1, title: "Gentle Prompt", text: "Look closely at where the single white ray enters the triangular glass. What happens to its direction?" },
+          { level: 2, title: "Observation Clue", text: "Compare the red ray at the top with the violet ray at the bottom. Which one bends more sharply?" },
+          { level: 3, title: "Concept Clue", text: "Light travels slower in glass than in air. That speed change bends the beam (refraction)." },
+          { level: 4, title: "Similar Example", text: "Imagine a wagon rolling from pavement into thick mud at an angle: the wheel that hits mud first slows down, steering the whole cart!" },
+          { level: 5, title: "Full Explanation", text: "White light is made of every color of the spectrum. Red light has the longest wavelength and bends the least; violet light has the shortest wavelength and bends the most. The prism separates them like a fan, producing a rainbow!" }
+        ],
+        flashcards: [
+          {
+            id: 'pr-1',
+            question: "Is white sunlight made of just one color?",
+            answer: "No! White light contains all colors of the visible spectrum (Red, Orange, Yellow, Green, Blue, Indigo, Violet) blended together."
+          },
+          {
+            id: 'pr-2',
+            question: "What is refraction?",
+            answer: "Refraction is the bending of light when it passes from one material into another (like air into glass or water) because its speed changes."
+          },
+          {
+            id: 'pr-3',
+            question: "Which color of light bends the MOST inside a glass prism?",
+            answer: "Violet light bends the most because it has the shortest wavelength. Red bends the least."
+          }
+        ],
+        quiz: [
+          {
+            id: 'q-pr-1',
+            question: "Why do colors separate when white light passes through a triangular glass prism?",
+            options: [
+              { id: 'a', text: "Different colors have different wavelengths and bend at different angles.", correct: true, explanation: "Brilliant! Each color bends at a unique angle, fanning out the spectrum." },
+              { id: 'b', text: "The glass has rainbow paint trapped inside.", correct: false, explanation: "The glass is completely clear—the colors were already inside the light!" }
+            ],
+            hint: "Think about whether the glass itself is colored or clear."
+          }
+        ]
+      }
+    };
+
+    // --- MAIN REACT APPLICATION COMPONENT ---
+    function Lumi6App() {
+      // Navigation & Modes
+      const [interactionMode, setInteractionMode] = useState('write'); // 'talk' | 'write'
+      const [activeConceptKey, setActiveConceptKey] = useState('shadows');
+      const [activeTab, setActiveTab] = useState('explore'); // 'explore' | 'flashcards' | 'quiz' | 'progress'
+
+      // Audio / Speech State
+      const [isListening, setIsListening] = useState(false);
+      const [isSpeaking, setIsSpeaking] = useState(false);
+      const [voiceEnabled, setVoiceEnabled] = useState(true);
+      const [transcriptText, setTranscriptText] = useState('');
+
+      // Conversational Learning State
+      const [messages, setMessages] = useState([
+        {
+          id: 'msg-1',
+          sender: 'lumi',
+          text: "Hi there! I'm Lumi, your thinking partner! What are you curious about today?",
+          timestamp: Date.now()
+        },
+        {
+          id: 'msg-2',
+          sender: 'lumi',
+          text: "Here is a mystery: Why does a shadow change size when an object moves?\n\nBefore we test it: What do you think will happen to the shadow if we move the light source closer to the object?",
+          predictionOptions: CONCEPT_DATA.shadows.predictionOptions,
+          timestamp: Date.now() + 100
+        }
+      ]);
+      const [inputText, setInputText] = useState('');
+      const [childPrediction, setChildPrediction] = useState(null);
+
+      // Simulation States
+      // 1. Shadow Simulation: light distance from object (15cm to 90cm)
+      const [lightDistance, setLightDistance] = useState(40);
+      // 2. Prism Simulation: rotation angle (25 to 65 deg)
+      const [prismAngle, setPrismAngle] = useState(45);
+      const [isWhiteLight, setIsWhiteLight] = useState(true);
+
+      // Hint Engine State (1 to 5)
+      const [hintLevel, setHintLevel] = useState(1);
+      const [showHintModal, setShowHintModal] = useState(false);
+
+      // Flashcards State
+      const [currentCardIndex, setCurrentCardIndex] = useState(0);
+      const [isCardFlipped, setIsCardFlipped] = useState(false);
+
+      // Quiz State
+      const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
+      const [selectedQuizOption, setSelectedQuizOption] = useState(null);
+      const [quizFeedback, setQuizFeedback] = useState(null);
+
+      // Learner Progress State (Stored locally)
+      const [progress, setProgress] = useState(() => {
+        try {
+          const saved = localStorage.getItem('lumi6_progress_data');
+          if (saved) return JSON.parse(saved);
+        } catch (e) {}
+        return {
+          predictionsAttempted: 1,
+          explanationsUnderstood: 0,
+          conceptsRevisited: 0,
+          quizQuestionsCompleted: 0,
+          cardsMastered: 0,
+          cardsReviewing: 0,
+          hintLevelsUsed: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+        };
+      });
+
+      // Save progress to local storage
+      useEffect(() => {
+        try {
+          localStorage.setItem('lumi6_progress_data', JSON.stringify(progress));
+        } catch (e) {}
+      }, [progress]);
+
+      const activeConcept = CONCEPT_DATA[activeConceptKey];
+      const chatEndRef = useRef(null);
+
+      // Auto-scroll chat to bottom
+      useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, [messages]);
+
+      // --- SPEECH SYNTHESIS HELPER ---
+      const speakText = (text) => {
+        if (!voiceEnabled || typeof window === 'undefined' || !window.speechSynthesis) return;
+        window.speechSynthesis.cancel();
+        // Strip markdown / newlines for natural speech
+        const clean = text.replace(/[*_#]/g, '').replace(/\n+/g, ' ');
+        const utterance = new SpeechSynthesisUtterance(clean);
+        utterance.rate = 0.95; // Friendly, calm cadence for children
+        utterance.pitch = 1.05; // Warm, inviting tone
+        utterance.onstart = () => setIsSpeaking(true);
+        utterance.onend = () => setIsSpeaking(false);
+        utterance.onerror = () => setIsSpeaking(false);
+        window.speechSynthesis.speak(utterance);
+      };
+
+      // --- SPEECH RECOGNITION (TALK MODE) ---
+      const toggleVoiceRecognition = () => {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+          alert("Speech recognition is not supported in this browser. You can type in Write Mode!");
+          return;
+        }
+
+        if (isListening) {
+          setIsListening(false);
+          return;
+        }
+
+        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRec();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+
+        recognition.onstart = () => {
+          setIsListening(true);
+          setTranscriptText('Listening to your curious question...');
+        };
+
+        recognition.onresult = (event) => {
+          const speechResult = event.results[0][0].transcript;
+          setTranscriptText(speechResult);
+          handleUserInquiry(speechResult);
+          setIsListening(false);
+        };
+
+        recognition.onerror = () => {
+          setIsListening(false);
+          setTranscriptText('');
+        };
+
+        recognition.onend = () => {
+          setIsListening(false);
+        };
+
+        recognition.start();
+      };
+
+      // AI Mode state: 'detecting' | 'live' | 'deterministic'
+      const [aiMode, setAiMode] = useState('deterministic');
+
+      // Check server health on startup
+      useEffect(() => {
+        fetch('/api/health')
+          .then(r => r.json())
+          .then(d => setAiMode(d.provider === 'gemini' ? 'live' : 'deterministic'))
+          .catch(() => setAiMode('deterministic'));
+      }, []);
+
+      // --- INQUIRY & THINK-FIRST RESPONSE ENGINE ---
+      const handleUserInquiry = async (text) => {
+        if (!text.trim()) return;
+
+        // Add child message
+        const childMsg = {
+          id: `child-${Date.now()}`,
+          sender: 'child',
+          text: text,
+          timestamp: Date.now()
+        };
+        setMessages(prev => [...prev, childMsg]);
+        setInputText('');
+
+        // Attempt server-side AI gateway first
+        let handledByServer = false;
+        try {
+          const res = await fetch('/api/inquiry', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              query: text,
+              conceptKey: activeConceptKey,
+              prediction: childPrediction
+            })
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.message) {
+              handledByServer = true;
+              setAiMode(data.provider === 'gemini' ? 'live' : 'deterministic');
+
+              if (data.visualActivity === 'shadow_distance') {
+                setActiveConceptKey('shadows');
+              } else if (data.visualActivity === 'prism_rainbow') {
+                setActiveConceptKey('prisms');
+              } else if (data.conceptKey && CONCEPT_DATA[data.conceptKey]) {
+                setActiveConceptKey(data.conceptKey);
+              }
+
+              const lumiMsg = {
+                id: `lumi-${Date.now()}`,
+                sender: 'lumi',
+                text: data.message,
+                predictionOptions: data.requiresPrediction ? data.predictionOptions : null,
+                timestamp: Date.now() + 150
+              };
+              setMessages(prev => [...prev, lumiMsg]);
+              speakText(data.message);
+
+              if (data.intent === 'explain_fully') {
+                setProgress(p => ({ ...p, explanationsUnderstood: p.explanationsUnderstood + 1 }));
+              }
+            }
+          }
+        } catch (fetchErr) {
+          handledByServer = false;
+        }
+
+        if (handledByServer) return;
+
+        // Local Deterministic Fallback Engine
+        const lower = text.toLowerCase();
+        let targetKey = activeConceptKey;
+        if (lower.includes('prism') || lower.includes('rainbow') || lower.includes('color') || lower.includes('refract')) {
+          targetKey = 'prisms';
+        } else if (lower.includes('shadow') || lower.includes('light') || lower.includes('dark')) {
+          targetKey = 'shadows';
+        }
+        setActiveConceptKey(targetKey);
+        const targetConcept = CONCEPT_DATA[targetKey];
+
+        // Did child request direct explanation?
+        if (lower.includes('explain') || lower.includes('tell me') || lower.includes('why does it') || lower.includes('answer')) {
+          const explanationMsg = {
+            id: `lumi-${Date.now()}`,
+            sender: 'lumi',
+            text: `Here is how it works!\n\n${targetConcept.scientificFact}\n\n💡 Real-world wonder: ${targetConcept.realWorldAnalogy}`,
+            timestamp: Date.now() + 200
+          };
+          setMessages(prev => [...prev, explanationMsg]);
+          speakText(explanationMsg.text);
+          setProgress(p => ({ ...p, explanationsUnderstood: p.explanationsUnderstood + 1 }));
+          return;
+        }
+
+        // Did child answer a prediction?
+        if (childPrediction === null) {
+          // Check for misconceptions
+          if (lower.includes('object gets bigger') || lower.includes('toy gets big')) {
+            const miscMsg = {
+              id: `lumi-${Date.now()}`,
+              sender: 'lumi',
+              text: "Interesting idea! Let's check it. Keep the toy the exact same size on the table and slide the light closer. What changes about the shadow on the wall?",
+              timestamp: Date.now() + 200
+            };
+            setMessages(prev => [...prev, miscMsg]);
+            speakText(miscMsg.text);
+            return;
+          }
+
+          // Acknowledge prediction with zero penalty
+          setChildPrediction(text);
+          setProgress(p => ({ ...p, predictionsAttempted: p.predictionsAttempted + 1 }));
+          const ackMsg = {
+            id: `lumi-${Date.now()}`,
+            sender: 'lumi',
+            text: `Awesome prediction! "${text}"\n\nNow look at our interactive workshop below. Slide the controls to test your idea! What do you observe?`,
+            timestamp: Date.now() + 200
+          };
+          setMessages(prev => [...prev, ackMsg]);
+          speakText(ackMsg.text);
+        } else {
+          // General observation discussion
+          const replyMsg = {
+            id: `lumi-${Date.now()}`,
+            sender: 'lumi',
+            text: `Great thinking! Notice how the straight rays from the light spread outwards. Would you like a hint on why that happens, or want to test your memory with a quick quiz?`,
+            timestamp: Date.now() + 200
+          };
+          setMessages(prev => [...prev, replyMsg]);
+          speakText(replyMsg.text);
+        }
+      };
+
+      // Handle clicking prediction button directly
+      const handleSelectPrediction = (optionText) => {
+        setChildPrediction(optionText);
+        setProgress(p => ({ ...p, predictionsAttempted: p.predictionsAttempted + 1 }));
+        
+        const childMsg = {
+          id: `child-${Date.now()}`,
+          sender: 'child',
+          text: `My prediction: ${optionText}`,
+          timestamp: Date.now()
+        };
+        const lumiMsg = {
+          id: `lumi-${Date.now()}`,
+          sender: 'lumi',
+          text: `Fabulous hypothesis! Let's test it right now in our workshop below. Move the slider and watch what happens!`,
+          timestamp: Date.now() + 200
+        };
+        setMessages(prev => [...prev, childMsg, lumiMsg]);
+        speakText(lumiMsg.text);
+      };
+
+      // Request next hint
+      const handleRequestHint = () => {
+        const nextLvl = Math.min(hintLevel + 1, 5);
+        setHintLevel(nextLvl);
+        setShowHintModal(true);
+        setProgress(p => ({
+          ...p,
+          hintLevelsUsed: { ...p.hintLevelsUsed, [nextLvl]: (p.hintLevelsUsed[nextLvl] || 0) + 1 }
+        }));
+      };
+
+      const handleRequestFullExplanation = () => {
+        setHintLevel(5);
+        setShowHintModal(true);
+        setProgress(p => ({
+          ...p,
+          explanationsUnderstood: p.explanationsUnderstood + 1,
+          hintLevelsUsed: { ...p.hintLevelsUsed, 5: (p.hintLevelsUsed[5] || 0) + 1 }
+        }));
+      };
+
+      // Quiz Answer Handler
+      const handleSelectQuizOption = (option) => {
+        setSelectedQuizOption(option);
+        if (option.correct) {
+          setQuizFeedback({
+            type: 'success',
+            title: "Nice observation!",
+            message: option.explanation
+          });
+          setProgress(p => ({ ...p, quizQuestionsCompleted: p.quizQuestionsCompleted + 1 }));
+          speakText("Nice observation! " + option.explanation);
+        } else {
+          setQuizFeedback({
+            type: 'try_again',
+            title: "Let's investigate another possibility!",
+            message: option.explanation + " Want to check a hint and try again?"
+          });
+          speakText("Let's look at another possibility. Want a hint?");
+        }
+      };
+
+      // Flashcard Response Handler
+      const handleFlashcardRating = (rating) => {
+        if (rating === 'understand') {
+          setProgress(p => ({ ...p, cardsMastered: p.cardsMastered + 1 }));
+        } else {
+          setProgress(p => ({ ...p, cardsReviewing: p.cardsReviewing + 1 }));
+        }
+        setIsCardFlipped(false);
+        if (currentCardIndex < activeConcept.flashcards.length - 1) {
+          setCurrentCardIndex(currentCardIndex + 1);
+        } else {
+          alert("🎉 You reviewed all flashcards for this concept! Great work!");
+          setCurrentCardIndex(0);
+        }
+      };
+
+      return (
+        <div className="flex flex-col min-h-screen">
+          {/* TOP APP HEADER */}
+          <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+            <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+              {/* Brand Logo & Tagline */}
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-2xl bg-brand-lavender text-white font-extrabold flex items-center justify-center text-xl shadow-md">
+                  L6
+                </div>
+                <div>
+                  <h1 className="text-xl font-extrabold text-ink-primary tracking-tight">Lumi6</h1>
+                  <p className="text-xs font-semibold text-brand-lavender uppercase tracking-wider">Think. Explore. Discover.</p>
+                </div>
+                <div className={`hidden sm:flex items-center space-x-1 px-2.5 py-1 rounded-full text-[11px] font-bold border ${
+                  aiMode === 'live'
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                    : 'bg-slate-100 text-slate-600 border-slate-200'
+                }`}>
+                  <span>{aiMode === 'live' ? '🟢 Live AI Gateway' : '🌱 Offline Safe'}</span>
+                </div>
+              </div>
+
+              {/* Mode Switcher: Talk vs Write */}
+              <div className="bg-brand-lavender-subtle p-1 rounded-2xl flex items-center border border-brand-lavender/20 shadow-inner">
+                <button
+                  onClick={() => { setInteractionMode('talk'); speakText("Switched to Talk Mode. Tap the microphone to talk!"); }}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                    interactionMode === 'talk'
+                      ? 'bg-brand-lavender text-white shadow-md'
+                      : 'text-ink-muted hover:text-ink-primary'
+                  }`}
+                  aria-label="Talk Mode"
+                >
+                  <span className="text-base">🎙️</span>
+                  <span>Talk Mode</span>
+                </button>
+                <button
+                  onClick={() => setInteractionMode('write')}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                    interactionMode === 'write'
+                      ? 'bg-brand-lavender text-white shadow-md'
+                      : 'text-ink-muted hover:text-ink-primary'
+                  }`}
+                  aria-label="Write Mode"
+                >
+                  <span className="text-base">✍️</span>
+                  <span>Write Mode</span>
+                </button>
+              </div>
+
+              {/* Quick Actions: Audio Mute & Progress */}
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => setVoiceEnabled(!voiceEnabled)}
+                  title={voiceEnabled ? "Mute Voice Readout" : "Enable Voice Readout"}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg border transition ${
+                    voiceEnabled ? 'bg-brand-mint-subtle text-brand-mint-dark border-brand-mint' : 'bg-slate-100 text-slate-400 border-slate-200'
+                  }`}
+                >
+                  {voiceEnabled ? '🔊' : '🔇'}
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('progress')}
+                  className="flex items-center space-x-2 px-3 py-2 rounded-xl bg-brand-yellow-subtle text-brand-yellow-dark border border-brand-yellow font-bold text-xs hover:bg-yellow-100 transition shadow-sm"
+                >
+                  <span>⭐ Progress</span>
+                  <span className="bg-white px-2 py-0.5 rounded-full text-ink-primary">{progress.predictionsAttempted + progress.quizQuestionsCompleted}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* TAB NAVIGATION: Workshop, Flashcards, Quiz */}
+            <div className="max-w-6xl mx-auto px-4 flex space-x-6 text-sm font-bold border-t border-slate-100">
+              <button
+                onClick={() => setActiveTab('explore')}
+                className={`py-3 border-b-2 flex items-center space-x-2 transition ${
+                  activeTab === 'explore' ? 'border-brand-lavender text-brand-lavender' : 'border-transparent text-ink-muted hover:text-ink-primary'
+                }`}
+              >
+                <span>🔬 Interactive Workshop</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('flashcards')}
+                className={`py-3 border-b-2 flex items-center space-x-2 transition ${
+                  activeTab === 'flashcards' ? 'border-brand-lavender text-brand-lavender' : 'border-transparent text-ink-muted hover:text-ink-primary'
+                }`}
+              >
+                <span>🗂️ Concept Flashcards</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('quiz')}
+                className={`py-3 border-b-2 flex items-center space-x-2 transition ${
+                  activeTab === 'quiz' ? 'border-brand-lavender text-brand-lavender' : 'border-transparent text-ink-muted hover:text-ink-primary'
+                }`}
+              >
+                <span>🎯 Thinking Quiz</span>
+              </button>
+            </div>
+          </header>
+
+          {/* MAIN WORKSPACE BODY */}
+          <main className="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            {/* LEFT COLUMN: CONVERSATION HUB (TALK / WRITE MODE) - 5 COLS */}
+            <section className="lg:col-span-5 flex flex-col bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden h-[620px]">
+              {/* Conversation Header */}
+              <div className="bg-brand-lavender-subtle p-3 px-4 border-b border-brand-lavender/10 flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 rounded-full bg-brand-lavender text-white flex items-center justify-center font-bold text-sm">
+                    ✨
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-bold text-ink-primary">Lumi Thinking Partner</h2>
+                    <p className="text-xs text-brand-lavender-dark font-medium">Topic: {activeConcept.title}</p>
+                  </div>
+                </div>
+
+                {/* Topic Selector Badge */}
+                <select
+                  value={activeConceptKey}
+                  onChange={(e) => {
+                    setActiveConceptKey(e.target.value);
+                    setChildPrediction(null);
+                    setHintLevel(1);
+                  }}
+                  className="text-xs font-bold bg-white text-ink-primary border border-slate-200 rounded-lg p-1.5 focus:ring-2 focus:ring-brand-lavender"
+                >
+                  <option value="shadows">🔦 Light & Shadows</option>
+                  <option value="prisms">🌈 Prisms & Rainbow</option>
+                </select>
+              </div>
+
+              {/* Chat Message Stream */}
+              <div className="flex-1 p-4 overflow-y-auto space-y-4">
+                {messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex flex-col ${msg.sender === 'child' ? 'items-end' : 'items-start'}`}
+                  >
+                    <div
+                      className={`max-w-[85%] rounded-2xl p-3.5 text-sm leading-relaxed shadow-sm ${
+                        msg.sender === 'child'
+                          ? 'bg-brand-lavender text-white font-medium rounded-br-none'
+                          : 'bg-surface-neutral text-ink-primary border border-slate-200 rounded-bl-none font-normal'
+                      }`}
+                    >
+                      {msg.text.split('\n\n').map((para, i) => (
+                        <p key={i} className={i > 0 ? 'mt-2' : ''}>{para}</p>
+                      ))}
+
+                      {/* Prediction Options Pill Buttons */}
+                      {msg.predictionOptions && childPrediction === null && (
+                        <div className="mt-3 space-y-2">
+                          <p className="text-xs font-bold text-brand-lavender uppercase tracking-wider">Choose a prediction:</p>
+                          {msg.predictionOptions.map((opt, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => handleSelectPrediction(opt)}
+                              className="w-full text-left text-xs font-semibold p-2.5 rounded-xl bg-white border border-brand-lavender/30 hover:border-brand-lavender hover:bg-brand-lavender-subtle text-ink-primary transition shadow-xs flex items-center justify-between group"
+                            >
+                              <span>{opt}</span>
+                              <span className="text-brand-lavender opacity-0 group-hover:opacity-100 font-bold">➔</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-[10px] text-slate-400 mt-1 px-1">
+                      {msg.sender === 'child' ? 'You' : 'Lumi'}
+                    </span>
+                  </div>
+                ))}
+                <div ref={chatEndRef} />
+              </div>
+
+              {/* DUAL MODE CONTROLS FOOTER */}
+              <div className="p-3 bg-surface-neutral border-t border-slate-200">
+                {interactionMode === 'talk' ? (
+                  /* TALK MODE INTERFACE */
+                  <div className="flex flex-col items-center justify-center p-4 space-y-3">
+                    <p className="text-xs font-bold text-ink-muted">
+                      {isListening ? "Listening... Speak your thought!" : isSpeaking ? "Lumi is explaining..." : "Tap the mic and ask anything!"}
+                    </p>
+
+                    {/* Acoustic Wave Animation when Speaking */}
+                    {isSpeaking && (
+                      <div className="flex items-center space-x-1.5 h-10">
+                        <div className="w-1.5 bg-brand-lavender rounded-full wave-bar"></div>
+                        <div className="w-1.5 bg-brand-mint rounded-full wave-bar"></div>
+                        <div className="w-1.5 bg-brand-lavender rounded-full wave-bar"></div>
+                        <div className="w-1.5 bg-brand-yellow-dark rounded-full wave-bar"></div>
+                        <div className="w-1.5 bg-brand-mint rounded-full wave-bar"></div>
+                      </div>
+                    )}
+
+                    {/* Giant Friendly Mic Button */}
+                    <button
+                      onClick={toggleVoiceRecognition}
+                      className={`w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold shadow-lg transition-transform active:scale-95 ${
+                        isListening
+                          ? 'bg-rose-500 text-white animate-pulse ring-4 ring-rose-200'
+                          : 'bg-brand-lavender text-white hover:bg-brand-lavender-dark'
+                      }`}
+                    >
+                      {isListening ? '🛑' : '🎙️'}
+                    </button>
+
+                    {transcriptText && (
+                      <p className="text-xs italic text-slate-500 text-center max-w-xs bg-white p-2 rounded-xl border border-slate-200">
+                        "{transcriptText}"
+                      </p>
+                    )}
+
+                    <div className="flex space-x-2 pt-1">
+                      <button
+                        onClick={() => handleUserInquiry("What will happen to the shadow if light gets closer?")}
+                        className="text-[11px] font-bold text-brand-lavender bg-white border border-brand-lavender/30 px-3 py-1 rounded-full hover:bg-brand-lavender-subtle"
+                      >
+                        "Predict shadow"
+                      </button>
+                      <button
+                        onClick={handleRequestFullExplanation}
+                        className="text-[11px] font-bold text-brand-mint-dark bg-brand-mint-subtle px-3 py-1 rounded-full hover:bg-teal-100"
+                      >
+                        "Explain it to me"
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  /* WRITE MODE INTERFACE */
+                  <div className="space-y-2">
+                    {/* Quick Curiosity Sparks */}
+                    <div className="flex items-center space-x-1 overflow-x-auto pb-1 text-xs">
+                      <button
+                        onClick={() => handleUserInquiry("Why does a shadow change size?")}
+                        className="whitespace-nowrap px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-ink-muted hover:border-brand-lavender hover:text-brand-lavender transition font-medium"
+                      >
+                        💡 Why do shadows change?
+                      </button>
+                      <button
+                        onClick={() => handleUserInquiry("How does a prism make a rainbow?")}
+                        className="whitespace-nowrap px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-ink-muted hover:border-brand-lavender hover:text-brand-lavender transition font-medium"
+                      >
+                        🌈 How do prisms work?
+                      </button>
+                      <button
+                        onClick={handleRequestFullExplanation}
+                        className="whitespace-nowrap px-2.5 py-1 rounded-lg bg-brand-mint-subtle text-brand-mint-dark border border-brand-mint/40 font-bold transition"
+                      >
+                        ✨ Explain it to me
+                      </button>
+                    </div>
+
+                    {/* Chat Input Field */}
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        handleUserInquiry(inputText);
+                      }}
+                      className="flex items-center space-x-2"
+                    >
+                      <input
+                        type="text"
+                        value={inputText}
+                        onChange={(e) => setInputText(e.target.value)}
+                        placeholder="Type a question or prediction..."
+                        className="flex-1 bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-lavender text-ink-primary shadow-inner"
+                      />
+                      <button
+                        type="submit"
+                        className="w-12 h-12 rounded-2xl bg-brand-lavender text-white font-bold flex items-center justify-center hover:bg-brand-lavender-dark transition shadow-md active:scale-95"
+                      >
+                        ➔
+                      </button>
+                    </form>
+                  </div>
+                )}
+              </div>
+            </section>
+
+
+            {/* RIGHT COLUMN: ACTIVE TAB AREA (WORKSHOP / FLASHCARDS / QUIZ / PROGRESS) - 7 COLS */}
+            <section className="lg:col-span-7 flex flex-col space-y-6">
+
+              {/* TAB 1: INTERACTIVE WORKSHOP */}
+              {activeTab === 'explore' && (
+                <div className="space-y-6">
+                  {/* SIMULATION CONTAINER CARD */}
+                  <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-5 space-y-4">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                      <div>
+                        <span className="text-xs font-bold text-brand-lavender uppercase tracking-wider">{activeConcept.subject}</span>
+                        <h2 className="text-lg font-bold text-ink-primary">{activeConcept.title}</h2>
+                      </div>
+
+                      {/* Hint Button */}
+                      <button
+                        onClick={handleRequestHint}
+                        className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-brand-lavender-subtle text-brand-lavender font-bold text-xs hover:bg-brand-lavender hover:text-white transition border border-brand-lavender/30"
+                      >
+                        <span>🪜 Progressive Hint ({hintLevel}/5)</span>
+                      </button>
+                    </div>
+
+                    {/* SIMULATION CANVAS / VISUAL ENGINE */}
+                    {activeConceptKey === 'shadows' ? (
+                      /* --- SHADOW SIMULATION --- */
+                      <div className="space-y-4">
+                        <div className="relative bg-slate-900 rounded-2xl p-4 overflow-hidden h-64 flex items-center justify-center border border-slate-800">
+                          {/* SVG Ray Tracing & Shadow Model */}
+                          <svg className="w-full h-full" viewBox="0 0 500 240">
+                            {/* Background Grid */}
+                            <defs>
+                              <linearGradient id="lightRayGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stopColor="#FDE047" stopOpacity="0.8" />
+                                <stop offset="100%" stopColor="#FDE047" stopOpacity="0.05" />
+                              </linearGradient>
+                            </defs>
+
+                            {/* Light Source (Flashlight) */}
+                            {/* Light X position based on lightDistance slider (50 to 220) */}
+                            {(() => {
+                              const lightX = 50 + (100 - lightDistance) * 1.7; // Closer = bigger X
+                              const toyX = 260;
+                              const toyTopY = 90;
+                              const toyBottomY = 170;
+                              const screenX = 460;
+
+                              // Ray 1 passing toy top: slope m1 = (toyTopY - 120) / (toyX - lightX)
+                              const mTop = (toyTopY - 120) / (toyX - lightX);
+                              const shadowTopY = Math.max(10, Math.min(230, 120 + mTop * (screenX - lightX)));
+
+                              // Ray 2 passing toy bottom: slope mBottom = (toyBottomY - 120) / (toyX - lightX)
+                              const mBottom = (toyBottomY - 120) / (toyX - lightX);
+                              const shadowBottomY = Math.max(10, Math.min(230, 120 + mBottom * (screenX - lightX)));
+
+                              return (
+                                <g>
+                                  {/* Light Cone Polygon */}
+                                  <polygon
+                                    points={`${lightX},120 ${screenX},${shadowTopY - 30} ${screenX},${shadowBottomY + 30}`}
+                                    fill="url(#lightRayGrad)"
+                                  />
+
+                                  {/* Projection Screen on the Right */}
+                                  <line x1={screenX} y1="15" x2={screenX} y2="225" stroke="#94A3B8" strokeWidth="8" strokeLinecap="round" />
+                                  <text x={screenX - 45} y="30" fill="#CBD5E1" fontSize="10" fontWeight="bold">WALL</text>
+
+                                  {/* Cast Shadow on Screen */}
+                                  <line
+                                    x1={screenX}
+                                    y1={shadowTopY}
+                                    x2={screenX}
+                                    y2={shadowBottomY}
+                                    stroke="#0F172A"
+                                    strokeWidth="12"
+                                    strokeLinecap="round"
+                                  />
+
+                                  {/* Top & Bottom Ray Guide Lines */}
+                                  <line x1={lightX} y1="120" x2={screenX} y2={shadowTopY} stroke="#FDE047" strokeWidth="1.5" strokeDasharray="4,4" />
+                                  <line x1={lightX} y1="120" x2={screenX} y2={shadowBottomY} stroke="#FDE047" strokeWidth="1.5" strokeDasharray="4,4" />
+
+                                  {/* The Stationary Toy (Bear Object) */}
+                                  <rect x={toyX - 10} y={toyTopY} width="20" height={toyBottomY - toyTopY} rx="6" fill="#A855F7" />
+                                  {/* Bear Ears & Head */}
+                                  <circle cx={toyX} cy={toyTopY + 15} r="18" fill="#A855F7" />
+                                  <circle cx={toyX - 14} cy={toyTopY + 3} r="6" fill="#C084FC" />
+                                  <circle cx={toyX + 14} cy={toyTopY + 3} r="6" fill="#C084FC" />
+                                  <text x={toyX - 22} y={toyBottomY + 20} fill="#E2E8F0" fontSize="10" fontWeight="bold">TOY OBJECT</text>
+
+                                  {/* Flashlight Icon */}
+                                  <g transform={`translate(${lightX - 35}, 105)`}>
+                                    <rect x="0" y="8" width="22" height="14" rx="2" fill="#E2E8F0" />
+                                    <polygon points="22,5 34,0 34,30 22,25" fill="#38BDF8" />
+                                    <circle cx="34" cy="15" r="4" fill="#FDE047" />
+                                  </g>
+                                  <text x={lightX - 25} y="150" fill="#FDE047" fontSize="10" fontWeight="bold">LIGHT</text>
+                                </g>
+                              );
+                            })()}
+                          </svg>
+
+                          {/* Dynamic Shadow Height Readout Badge */}
+                          <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 text-white text-xs">
+                            <span className="text-yellow-300 font-bold">
+                              Shadow Height: {Math.round(80 * (100 / lightDistance))} px
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Interactive Sliders & Controls */}
+                        <div className="bg-surface-neutral p-4 rounded-2xl border border-slate-200 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <label className="text-xs font-bold text-ink-primary">
+                              Move Flashlight Distance: <span className="text-brand-lavender">{lightDistance} cm</span>
+                            </label>
+                            <span className="text-xs text-slate-400">
+                              {lightDistance < 35 ? "🔥 Very Close to Object" : lightDistance > 75 ? "❄️ Far from Object" : "⚖️ Medium Distance"}
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min="15"
+                            max="90"
+                            value={lightDistance}
+                            onChange={(e) => setLightDistance(Number(e.target.value))}
+                            className="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-brand-lavender"
+                          />
+                          <div className="flex justify-between text-[11px] text-slate-400 font-medium">
+                            <span>Closer (Giant Shadow)</span>
+                            <span>Farther (Smaller Shadow)</span>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      /* --- PRISM & RAINBOW SIMULATION --- */
+                      <div className="space-y-4">
+                        <div className="relative bg-slate-950 rounded-2xl p-4 overflow-hidden h-64 flex items-center justify-center border border-slate-800">
+                          <svg className="w-full h-full" viewBox="0 0 500 240">
+                            {/* Prism Triangle */}
+                            <polygon points="250,40 180,180 320,180" fill="rgba(255,255,255,0.08)" stroke="#E2E8F0" strokeWidth="2.5" />
+                            <text x="230" y="140" fill="#94A3B8" fontSize="11" fontWeight="bold">PRISM</text>
+
+                            {/* Incoming Light Beam */}
+                            <line x1="40" y1="120" x2="215" y2="120" stroke={isWhiteLight ? "#FFFFFF" : "#EF4444"} strokeWidth="5" />
+                            <text x="50" y="105" fill="#E2E8F0" fontSize="11" fontWeight="bold">
+                              {isWhiteLight ? "WHITE SUNLIGHT" : "RED MONOCHROME BEAM"}
+                            </text>
+
+                            {/* Refracted & Dispersed Color Rays exiting Prism */}
+                            {isWhiteLight ? (
+                              <g>
+                                {/* Red Ray (bends least) */}
+                                <line x1="265" y1="110" x2="460" y2="75" stroke="#EF4444" strokeWidth="3" />
+                                <text x="465" y="80" fill="#EF4444" fontSize="9" fontWeight="bold">Red</text>
+
+                                {/* Orange Ray */}
+                                <line x1="265" y1="115" x2="460" y2="95" stroke="#F97316" strokeWidth="3" />
+
+                                {/* Yellow Ray */}
+                                <line x1="265" y1="120" x2="460" y2="115" stroke="#FDE047" strokeWidth="3" />
+
+                                {/* Green Ray */}
+                                <line x1="265" y1="125" x2="460" y2="135" stroke="#22C55E" strokeWidth="3" />
+
+                                {/* Blue Ray */}
+                                <line x1="265" y1="130" x2="460" y2="155" stroke="#3B82F6" strokeWidth="3" />
+
+                                {/* Violet Ray (bends most) */}
+                                <line x1="265" y1="135" x2="460" y2="175" stroke="#8B5CF6" strokeWidth="3" />
+                                <text x="465" y="180" fill="#8B5CF6" fontSize="9" fontWeight="bold">Violet</text>
+                              </g>
+                            ) : (
+                              /* Monochromatic beam (no rainbow dispersion) */
+                              <line x1="265" y1="110" x2="460" y2="75" stroke="#EF4444" strokeWidth="4" />
+                            )}
+                          </svg>
+
+                          <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md px-3 py-1 rounded-xl border border-white/10 text-white text-xs">
+                            <span>Refraction Angle: <strong>{prismAngle}°</strong></span>
+                          </div>
+                        </div>
+
+                        {/* Prism Controls */}
+                        <div className="grid grid-cols-2 gap-3 bg-surface-neutral p-3 rounded-2xl border border-slate-200">
+                          <button
+                            onClick={() => setIsWhiteLight(true)}
+                            className={`p-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-2 ${
+                              isWhiteLight ? 'bg-white text-ink-primary shadow-sm border border-slate-300' : 'text-ink-muted'
+                            }`}
+                          >
+                            <span>☀️ White Sunlight</span>
+                          </button>
+                          <button
+                            onClick={() => setIsWhiteLight(false)}
+                            className={`p-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center space-x-2 ${
+                              !isWhiteLight ? 'bg-red-500 text-white shadow-sm' : 'text-ink-muted'
+                            }`}
+                          >
+                            <span>🔴 Red Laser Beam</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* REAL-WORLD PRACTICAL HOME ACTIVITY ACCORDION */}
+                    <div className="bg-brand-mint-subtle/50 p-4 rounded-2xl border border-brand-mint/30 space-y-2">
+                      <div className="flex items-center space-x-2 text-brand-mint-dark font-bold text-sm">
+                        <span>🏡 Try It at Home (Safe Real-World Activity):</span>
+                      </div>
+                      <h4 className="text-sm font-bold text-ink-primary">{activeConcept.practicalHomeActivity.title}</h4>
+                      <ul className="text-xs text-ink-muted list-disc list-inside space-y-1">
+                        {activeConcept.practicalHomeActivity.steps.map((st, i) => (
+                          <li key={i}>{st}</li>
+                        ))}
+                      </ul>
+                      <p className="text-[11px] font-semibold text-brand-yellow-dark bg-yellow-50 p-2 rounded-lg border border-yellow-200">
+                        🛡️ Safety Tip: {activeConcept.practicalHomeActivity.safetyTip}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 2: INTERACTIVE CONCEPT FLASHCARDS */}
+              {activeTab === 'flashcards' && (
+                <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-5">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div>
+                      <h3 className="text-base font-extrabold text-ink-primary">Thinking Flashcards</h3>
+                      <p className="text-xs text-slate-400">Card {currentCardIndex + 1} of {activeConcept.flashcards.length}</p>
+                    </div>
+                    <span className="text-xs font-bold bg-brand-lavender-subtle text-brand-lavender px-3 py-1 rounded-full">
+                      Tap card to flip!
+                    </span>
+                  </div>
+
+                  {/* 3D FLIP CARD */}
+                  <div
+                    onClick={() => setIsCardFlipped(!isCardFlipped)}
+                    className="w-full h-64 cursor-pointer perspective-1000 select-none"
+                  >
+                    <div className={`relative w-full h-full duration-500 transform-style-3d ${isCardFlipped ? 'rotate-y-180' : ''}`}>
+                      {/* FRONT OF CARD */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-brand-lavender-subtle to-white rounded-3xl border-2 border-brand-lavender/30 p-6 flex flex-col justify-between backface-hidden shadow-sm">
+                        <div className="flex justify-between items-center text-xs font-bold text-brand-lavender">
+                          <span>QUESTION</span>
+                          <span>🔄 Tap to reveal answer</span>
+                        </div>
+                        <p className="text-lg font-extrabold text-ink-primary text-center my-auto">
+                          {activeConcept.flashcards[currentCardIndex].question}
+                        </p>
+                        <div className="text-center text-xs font-semibold text-slate-400">
+                          {activeConcept.title}
+                        </div>
+                      </div>
+
+                      {/* BACK OF CARD */}
+                      <div className="absolute inset-0 bg-white rounded-3xl border-2 border-brand-mint/40 p-6 flex flex-col justify-between rotate-y-180 backface-hidden shadow-sm">
+                        <div className="flex justify-between items-center text-xs font-bold text-brand-mint-dark">
+                          <span>CONCEPT EXPLANATION</span>
+                          <span>💡 Answer</span>
+                        </div>
+                        <p className="text-base font-bold text-ink-primary text-center my-auto leading-relaxed">
+                          {activeConcept.flashcards[currentCardIndex].answer}
+                        </p>
+                        <div className="text-center text-xs text-slate-400">
+                          How well do you understand this?
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3-TIER RESPONSE BUTTONS (Only visible when flipped) */}
+                  {isCardFlipped ? (
+                    <div className="grid grid-cols-3 gap-3 pt-2">
+                      <button
+                        onClick={() => handleFlashcardRating('understand')}
+                        className="py-3 px-2 rounded-2xl bg-brand-mint-subtle text-brand-mint-dark border border-brand-mint font-bold text-xs hover:bg-teal-100 transition text-center shadow-xs"
+                      >
+                        ✅ I understand
+                      </button>
+                      <button
+                        onClick={() => handleFlashcardRating('learning')}
+                        className="py-3 px-2 rounded-2xl bg-yellow-50 text-amber-700 border border-amber-300 font-bold text-xs hover:bg-yellow-100 transition text-center shadow-xs"
+                      >
+                        ⏳ Still learning
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleRequestFullExplanation();
+                          handleFlashcardRating('re_explain');
+                        }}
+                        className="py-3 px-2 rounded-2xl bg-brand-lavender-subtle text-brand-lavender font-bold text-xs border border-brand-lavender/30 hover:bg-brand-lavender hover:text-white transition text-center shadow-xs"
+                      >
+                        🔍 Explain differently
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="text-center text-xs text-slate-400 pt-2">
+                      Tap the card to reveal the explanation and rate your confidence!
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* TAB 3: THINKING QUIZ */}
+              {activeTab === 'quiz' && (
+                <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-5">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div>
+                      <h3 className="text-base font-extrabold text-ink-primary">Thinking Milestone Quiz</h3>
+                      <p className="text-xs text-slate-400">Question {currentQuizIndex + 1} of {activeConcept.quiz.length}</p>
+                    </div>
+                    <span className="text-xs font-bold text-brand-mint-dark bg-brand-mint-subtle px-3 py-1 rounded-full">
+                      No countdown • No penalties
+                    </span>
+                  </div>
+
+                  {/* Quiz Question Prompt */}
+                  <div className="bg-surface-neutral p-4 rounded-2xl border border-slate-200">
+                    <p className="text-base font-bold text-ink-primary leading-snug">
+                      {activeConcept.quiz[currentQuizIndex].question}
+                    </p>
+                  </div>
+
+                  {/* Options List */}
+                  <div className="space-y-3">
+                    {activeConcept.quiz[currentQuizIndex].options.map((opt) => (
+                      <button
+                        key={opt.id}
+                        onClick={() => handleSelectQuizOption(opt)}
+                        className={`w-full text-left p-4 rounded-2xl border text-sm font-semibold transition flex items-center justify-between ${
+                          selectedQuizOption?.id === opt.id
+                            ? opt.correct
+                              ? 'bg-emerald-50 border-emerald-500 text-emerald-900 ring-2 ring-emerald-200'
+                              : 'bg-amber-50 border-amber-400 text-amber-900'
+                            : 'bg-white border-slate-200 hover:border-brand-lavender text-ink-primary'
+                        }`}
+                      >
+                        <span>{opt.text}</span>
+                        {selectedQuizOption?.id === opt.id && (
+                          <span className="text-lg">{opt.correct ? '🌟' : '🤔'}</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* SUPPORTIVE MISTAKE-RECOVERY & SUCCESS FEEDBACK */}
+                  {quizFeedback && (
+                    <div className={`p-4 rounded-2xl border space-y-2 ${
+                      quizFeedback.type === 'success'
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                        : 'bg-amber-50 border-amber-200 text-amber-900'
+                    }`}>
+                      <h4 className="text-sm font-extrabold flex items-center space-x-1.5">
+                        <span>{quizFeedback.type === 'success' ? '🎉' : '🌱'}</span>
+                        <span>{quizFeedback.title}</span>
+                      </h4>
+                      <p className="text-xs leading-relaxed">{quizFeedback.message}</p>
+
+                      <div className="flex space-x-3 pt-2">
+                        {quizFeedback.type === 'try_again' && (
+                          <button
+                            onClick={() => {
+                              setSelectedQuizOption(null);
+                              setQuizFeedback(null);
+                              handleRequestHint();
+                            }}
+                            className="px-3 py-1.5 rounded-xl bg-white border border-amber-300 text-amber-800 text-xs font-bold hover:bg-amber-100 transition shadow-xs"
+                          >
+                            🪜 See Hint & Try Again
+                          </button>
+                        )}
+                        {currentQuizIndex < activeConcept.quiz.length - 1 && quizFeedback.type === 'success' && (
+                          <button
+                            onClick={() => {
+                              setCurrentQuizIndex(currentQuizIndex + 1);
+                              setSelectedQuizOption(null);
+                              setQuizFeedback(null);
+                            }}
+                            className="px-4 py-2 rounded-xl bg-brand-lavender text-white text-xs font-bold hover:bg-brand-lavender-dark transition shadow-md"
+                          >
+                            Next Question ➔
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* TAB 4: NONCOMPETITIVE PROGRESS TRACKER */}
+              {activeTab === 'progress' && (
+                <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-5">
+                  <div className="border-b border-slate-100 pb-3">
+                    <h3 className="text-base font-extrabold text-ink-primary">My Discovery Milestones</h3>
+                    <p className="text-xs text-slate-400">Your independent learning journey. No rankings, no pressure!</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div className="bg-brand-lavender-subtle p-4 rounded-2xl border border-brand-lavender/20 text-center">
+                      <span className="text-2xl">🎯</span>
+                      <p className="text-xl font-black text-brand-lavender mt-1">{progress.predictionsAttempted}</p>
+                      <p className="text-xs font-bold text-ink-muted">Predictions Tested</p>
+                    </div>
+
+                    <div className="bg-brand-mint-subtle p-4 rounded-2xl border border-brand-mint/30 text-center">
+                      <span className="text-2xl">💡</span>
+                      <p className="text-xl font-black text-brand-mint-dark mt-1">{progress.explanationsUnderstood}</p>
+                      <p className="text-xs font-bold text-ink-muted">Concepts Understood</p>
+                    </div>
+
+                    <div className="bg-brand-yellow-subtle p-4 rounded-2xl border border-brand-yellow/50 text-center">
+                      <span className="text-2xl">🗂️</span>
+                      <p className="text-xl font-black text-brand-yellow-dark mt-1">{progress.cardsMastered}</p>
+                      <p className="text-xs font-bold text-ink-muted">Cards Mastered</p>
+                    </div>
+
+                    <div className="bg-surface-neutral p-4 rounded-2xl border border-slate-200 text-center">
+                      <span className="text-2xl">🪜</span>
+                      <p className="text-xl font-black text-ink-primary mt-1">
+                        {Object.values(progress.hintLevelsUsed).reduce((a, b) => a + b, 0)}
+                      </p>
+                      <p className="text-xs font-bold text-ink-muted">Hints Explored</p>
+                    </div>
+
+                    <div className="bg-surface-neutral p-4 rounded-2xl border border-slate-200 text-center">
+                      <span className="text-2xl">🎯</span>
+                      <p className="text-xl font-black text-ink-primary mt-1">{progress.quizQuestionsCompleted}</p>
+                      <p className="text-xs font-bold text-ink-muted">Quiz Milestones</p>
+                    </div>
+
+                    <div className="bg-surface-neutral p-4 rounded-2xl border border-slate-200 text-center">
+                      <span className="text-2xl">🔒</span>
+                      <p className="text-xs font-bold text-ink-primary mt-2">Private & Local</p>
+                      <p className="text-[10px] text-slate-400">Stored on your device</p>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-100 flex justify-between items-center">
+                    <p className="text-xs text-slate-400">Progress is stored safely in your browser.</p>
+                    <button
+                      onClick={() => {
+                        if (confirm("Reset learning progress on this device?")) {
+                          localStorage.removeItem('lumi6_progress_data');
+                          setProgress({
+                            predictionsAttempted: 0,
+                            explanationsUnderstood: 0,
+                            conceptsRevisited: 0,
+                            quizQuestionsCompleted: 0,
+                            cardsMastered: 0,
+                            cardsReviewing: 0,
+                            hintLevelsUsed: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+                          });
+                        }
+                      }}
+                      className="text-xs text-rose-500 font-bold hover:underline"
+                    >
+                      Clear Progress
+                    </button>
+                  </div>
+                </div>
+              )}
+
+            </section>
+          </main>
+
+          {/* PROGRESSIVE HINT & EXPLANATION MODAL */}
+          {showHintModal && (
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xl">🪜</span>
+                    <h3 className="text-base font-extrabold text-ink-primary">
+                      Hint Level {hintLevel} of 5: {activeConcept.hints[hintLevel - 1].title}
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => setShowHintModal(false)}
+                    className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="bg-brand-lavender-subtle p-4 rounded-2xl border border-brand-lavender/20">
+                  <p className="text-sm text-ink-primary font-medium leading-relaxed">
+                    {activeConcept.hints[hintLevel - 1].text}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between pt-2">
+                  <div className="flex space-x-2">
+                    {hintLevel < 5 && (
+                      <button
+                        onClick={handleRequestHint}
+                        className="px-3 py-2 rounded-xl bg-brand-lavender text-white font-bold text-xs hover:bg-brand-lavender-dark transition shadow-sm"
+                      >
+                        Another hint ➔
+                      </button>
+                    )}
+                    {hintLevel < 5 && (
+                      <button
+                        onClick={handleRequestFullExplanation}
+                        className="px-3 py-2 rounded-xl bg-brand-mint-subtle text-brand-mint-dark font-bold text-xs hover:bg-teal-100 transition"
+                      >
+                        Explain it to me
+                      </button>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => setShowHintModal(false)}
+                    className="px-4 py-2 rounded-xl bg-slate-100 text-ink-primary font-bold text-xs hover:bg-slate-200 transition"
+                  >
+                    Got it!
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ACCESSIBLE FOOTER */}
+          <footer className="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400">
+            <p>Lumi6 Learning Platform — Think. Explore. Discover. • Built for Curious Minds Aged 8–12</p>
+          </footer>
+        </div>
+      );
+    }
+
+    // Render the React application
+    ReactDOM.render(<Lumi6App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
